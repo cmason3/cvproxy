@@ -48,3 +48,5 @@ Example:
 
 If the HTTP POST request succeeds and there are any changes then a Change Control will be created in CloudVision ready for you to review and approve.
 The `cv_change_control_name` attribute is optional and if not provided will use the AVD default.
+
+Successful HTTP responses will be JSON encoded and will always contain a `status` attribute, which will either be "ok" or "error" - if it is set to "error" then an `error` attribute will also be provided with details of why it failed.
