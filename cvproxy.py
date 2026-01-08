@@ -57,11 +57,18 @@ class CVProxyRequest(BaseHTTPRequestHandler):
   protocol_version = 'HTTP/1.1'
 
   def log_message(self, format, *args):
+    if int(args[1]) >= 400:
+      status = f'\033[31m{args[1]}\033[0m'
+    elif int(args[1]) >= 300:
+      status = f'\033[33m{args[1]}\033[0m'
+    else:
+      status = f'\033[32m{args[1]}\033[0m'
+
     if self.args.xff and 'X-Forwarded-For' in self.headers:
-      log(f'[{self.headers["X-Forwarded-For"]}] [{args[1]}] {args[0]}')
+      log(f'[{self.headers["X-Forwarded-For"]}] [{status}] {args[0]}')
 
     else:
-      log(f'[{self.address_string()}] [{args[1]}] {args[0]}')
+      log(f'[{self.address_string()}] [{status}] {args[0]}')
 
   def do_POST(self):
     try:
