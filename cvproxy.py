@@ -57,7 +57,11 @@ class CVProxyRequest(BaseHTTPRequestHandler):
   protocol_version = 'HTTP/1.1'
 
   def log_message(self, format, *args):
-    log(f'[{self.address_string()}] [{args[1]}] {args[0]}')
+    if self.args.xff and 'X-Forwarded-For' in self.headers:
+      log(f'[{self.headers["X-Forwarded-For"]}] [{args[1]}] {args[0]}')
+
+    else:
+      log(f'[{self.address_string()}] [{args[1]}] {args[0]}')
 
   def do_POST(self):
     try:
@@ -121,17 +125,18 @@ class CVProxyRequest(BaseHTTPRequestHandler):
     self.wfile.write(r[2].encode('utf-8'))
 
 class CVProxyThread(threading.Thread):
-  def __init__(self, s, addr):
+  def __init__(self, s, args):
     threading.Thread.__init__(self)
     self.s = s
-    self.addr = addr
+    self.args = args
     self.daemon = True
     self.start()
 
   def run(self):
-    httpd = HTTPServer(self.addr, CVProxyRequest, False)
+    httpd = HTTPServer((self.args.l, self.args.p), CVProxyRequest, False)
     httpd.socket = self.s
     httpd.server_bind = self.server_close = lambda self: None
+    httpd.RequestHandlerClass.args = self.args
     httpd.serve_forever()
 
 def log(t):
@@ -145,9 +150,11 @@ def main(flag=[0], n_threads=4):
     print(f'CVProxy v{__version__} - CloudVision Proxy')
     print('Copyright (c) 2026 Chris Mason <chris@netnix.org>\n')
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-l', metavar='<address>', default='127.0.0.1', help='listen address', type=str)
-    parser.add_argument('-p', metavar='<port>', default=8080, help='listen port', type=int)
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('-s', action='store_true', required=True)
+    parser.add_argument('-l', metavar='<address>', default='127.0.0.1', type=str)
+    parser.add_argument('-p', metavar='<port>', default=8080, type=int)
+    parser.add_argument('-xff', action='store_true', default=False)
     args = parser.parse_args()
 
     def signal_handler(*args):
@@ -166,7 +173,7 @@ def main(flag=[0], n_threads=4):
     flag[0] = 1
 
     for i in range(n_threads):
-      CVProxyThread(s, (args.l, args.p))
+      CVProxyThread(s, args)
 
     while flag[0] < 2:
       time.sleep(0.1)
