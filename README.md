@@ -1,2 +1,50 @@
-# cvproxy
-Arista CloudVision Proxy
+# Arista CloudVision Proxy
+
+Arista are transitioning their CloudVision provisioning model to use Studios and Workspaces, but the HTTP REST API only supports the legacy provisioning model, which has now been deprecated. The new API uses gRPC and is rather complex, but Arista provides a Python library to talk to that API, which is used by Ansible via the `arista.avd.cv_deploy` role. The purpose of this tool is to use `pyavd` to handle that complexity and to provide a HTTP proxy to convert between simplified JSON and gRPC using the same workflow that Ansible uses via `pyavd._cv.workflows.deploy_to_cv`.
+
+It works by accepting a HTTP POST request with a `Content-Type` of `application/json`, which should adhere to the following schema:
+
+```json
+"unevaluatedProperties": false,
+"required": ["devices", "cv_server", "cv_token"],
+"properties": {
+  "devices": {
+    "minProperties": 1,
+    "unevaluatedProperties": false,
+    "patternProperties": {
+      "^[a-z][a-z0-9_-]*$": {
+        "unevaluatedProperties": false,
+        "required": ["configlet"],
+        "properties": {
+          "serial_number": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{10}$" },
+          "configlet": { "type": "string", "pattern": "^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$" }
+        }
+      }
+    }
+  },
+  "cv_server": { "type": "string", "minLength": 1 },
+  "cv_token": { "type": "string", "minLength": 1 },
+  "cv_change_control_name": { "type": "string", "minLength": 1 }
+}
+```
+
+The `serial_number` attribute is optional as it should be able to identify the device based on the hostname, unless it is a new device and there is no existing configlet.
+The `configlet` attribute is mandatory and is the configlet for the device, which must be Base64 encoded.
+
+Example:
+
+```json
+"devices": {
+  "leaf-1a": {
+    "configlet": "<base64 encoded configlet>"
+  },
+  "leaf-1b": {
+    "configlet": "<base64 encoded configlet>"
+  }
+},
+"cv_server": "www.cv-prod-uk-1.arista.io",
+"cv_token": "<service token>"
+```
+
+If the HTTP POST request succeeds and there are any changes then a Change Control will be created in CloudVision ready for you to review and approve.
+The `cv_change_control_name` attribute is optional and if not provided will use the AVD default.
