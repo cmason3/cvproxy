@@ -1,6 +1,6 @@
 # Arista CloudVision Proxy
 
-Arista are transitioning their CloudVision provisioning model to use Studios and Workspaces, but the HTTP REST API only supports the legacy provisioning model, which has now been deprecated. The new API uses gRPC and is rather complex, but Arista provides a Python library to talk to that API, which is used by Ansible via the `arista.avd.cv_deploy` role. The purpose of this tool is to use `pyavd` to handle that complexity and to provide a HTTP proxy to convert between simplified JSON and gRPC using the same workflow that Ansible uses via `pyavd._cv.workflows.deploy_to_cv`.
+Arista are transitioning their CloudVision provisioning model to use Studios and Workspaces, but the HTTP REST API only supports the legacy provisioning model, which has now been deprecated. The new API uses gRPC and is rather complex, but Arista provides a Python library to talk to the API, which is used by Ansible via the `arista.avd.cv_deploy` role. The purpose of this tool is to use `pyavd` to handle the complexity and to provide a HTTP proxy to convert between simplified JSON and gRPC using the same workflow that Ansible uses via `pyavd._cv.workflows.deploy_to_cv`.
 
 It works by accepting a HTTP POST request with a `Content-Type` of `application/json`, which should adhere to the following schema:
 
