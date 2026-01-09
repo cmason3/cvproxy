@@ -1,3 +1,5 @@
+![Python](https://img.shields.io/badge/python-≥&nbsp;3.10-brightgreen)
+
 # Arista CloudVision Proxy
 
 Arista are transitioning their CloudVision provisioning model to use Studios and Workspaces, but the HTTP REST API only supports the legacy provisioning model, which has now been deprecated. The new API uses gRPC and is rather complex, but Arista provides a Python library to talk to the API, which is used by Ansible via the `arista.avd.cv_deploy` role. The purpose of this tool is to use `pyavd` to handle the complexity and to provide a HTTP proxy to convert between simplified JSON and gRPC using the same workflow that Ansible uses via `pyavd._cv.workflows.deploy_to_cv`.
@@ -49,4 +51,8 @@ Example:
 If the HTTP POST request succeeds and there are any changes then a Change Control will be created in CloudVision ready for you to review and approve.
 The `cv_change_control_name` attribute is optional and if not provided will use the AVD default.
 
-Successful HTTP responses will be JSON encoded and will always contain a `status` attribute, which will either be "ok" or "error" - if it is set to "error" then an `error` attribute will also be provided with details of why it failed.
+Successful HTTP responses will be JSON encoded and will always contain a `status` attribute, which will either be "ok" or "error".
+If it is set to "ok" then an optional `change_control` attribute will be included if a Change Control was generated.
+If it is set to "error" then an `error` attribute will also be provided with details of why it failed.
+
+The recommended deployment is to deploy HAProxy in front of CVProxy, as HAProxy is better equipped to deal with TLS termination and it also supports HTTP/2 and HTTP/3 transports.
