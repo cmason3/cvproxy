@@ -31,7 +31,7 @@ It works by accepting a HTTP POST request with a `Content-Type` of `application/
     "minProperties": 1,
     "unevaluatedProperties": false,
     "patternProperties": {
-      "^[a-z][a-z0-9_-]*$": {
+      "^[a-z][a-z0-9_.-]*$": {
         "unevaluatedProperties": false,
         "required": ["configlet"],
         "properties": {
