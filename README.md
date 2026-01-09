@@ -4,6 +4,23 @@
 
 Arista are transitioning their CloudVision provisioning model to use Studios and Workspaces, but the HTTP REST API only supports the legacy provisioning model, which has now been deprecated. The new API uses gRPC and is rather complex, but Arista provides a Python library to talk to the API, which is used by Ansible via the `arista.avd.cv_deploy` role. The purpose of this tool is to use `pyavd` to handle the complexity and to provide a HTTP proxy to convert between simplified JSON and gRPC using the same workflow that Ansible uses via `pyavd._cv.workflows.deploy_to_cv`.
 
+### Installation
+
+```
+python3 -m pip install --upgrade cvproxy
+```
+
+### Usage
+
+```
+ cvproxy -s [-l <address>] [-p <port>] [-xff]
+
+   -s                         - start CVProxy
+   -l <address>               - specify a listen address (default is '127.0.0.1')
+   -p <port>                  - specify a listen port (default is 8080)
+   -xff                       - use X-Forwarded-For
+```
+
 It works by accepting a HTTP POST request with a `Content-Type` of `application/json`, which should adhere to the following schema:
 
 ```json
