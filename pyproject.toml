@@ -18,7 +18,7 @@ Issues = "https://github.com/cmason3/cvproxy/issues"
 Changelog = "https://github.com/cmason3/cvproxy/blob/main/CHANGELOG.md"
 
 [project.scripts]
-cvproxy = "cvproxy:__main__"
+cvproxy = "cvproxy:main"
 
 [build-system]
 requires = ["setuptools>=77.0.3"]
