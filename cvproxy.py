@@ -26,7 +26,7 @@ from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVCha
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 schema = {
   'unevaluatedProperties': False,
@@ -82,6 +82,18 @@ class CVProxyRequest(BaseHTTPRequestHandler):
     else:
       log(f'[{self.address_string()}] [{rcode}] {args[0]}')
 
+  def __getattr__(self, attr):
+    if attr.startswith('do_') and attr != 'do_POST':
+      return self.do_405
+    else:
+      return super().__getattr__(attr) 
+
+  def do_405(self):
+    self.send_response(405)
+    self.send_header('Content-Length', 0)
+    self.send_header('Allow', 'POST')
+    self.end_headers()
+
   def do_POST(self):
     self.status = None
 
@@ -131,24 +143,35 @@ class CVProxyRequest(BaseHTTPRequestHandler):
           r = ['text/plain', 200, json.dumps(response, indent=2)]
 
         else:
-          r = ['text/plain', 400, '400 Bad Request']
+          r = ['text/plain', 400, None]
 
       else:
-        r = ['text/plain', 415, '415 Unsupported Media Type']
+        r = ['text/plain', 415, None]
+
+    except jsonschema.ValidationError as e:
+      response = { 'status': 'error', 'errors': [f'{type(e).__name__}: {e.message}'] }
+      r = ['text/plain', 200, json.dumps(response, indent=2)]
 
     except Exception as e:
-      response = { 'status': 'error', 'errors': [f'{type(e).__name__}: {e.message}'] }
+      response = { 'status': 'error', 'errors': [f'{type(e).__name__}: {e}'] }
       r = ['text/plain', 200, json.dumps(response, indent=2)]
 
     finally:
       for config_object in config_objects:
         os.remove(config_object.file)
-      
+
     self.send_response(r[1])
-    self.send_header('Content-Type', r[0])
-    self.send_header('Content-Length', len(r[2]))
+
+    if r[2] is not None:
+      self.send_header('Content-Type', r[0])
+      self.send_header('Content-Length', len(r[2]))
+    else:
+      self.send_header('Content-Length', 0)
+
     self.end_headers()
-    self.wfile.write(r[2].encode('utf-8'))
+
+    if r[2] is not None:
+      self.wfile.write(r[2].encode('utf-8'))
 
 class CVProxyThread(threading.Thread):
   def __init__(self, s, args):
@@ -169,12 +192,16 @@ def log(t):
   timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
 
   with llock:
-    print(f'[{timestamp}] {t}')
+    if os.getenv('JOURNAL_STREAM'):
+      print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t))
+    else:
+      print(f'[{timestamp}] {t}')
   
 def main(flag=[0], n_threads=4):
   try:
-    print(f'CVProxy v{__version__} - CloudVision Proxy')
-    print('Copyright (c) 2026 Chris Mason <chris@netnix.org>\n')
+    if not os.getenv('JOURNAL_STREAM'):
+      print(f'CVProxy v{__version__} - CloudVision Proxy')
+      print('Copyright (c) 2026 Chris Mason <chris@netnix.org>\n')
 
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('-s', action='store_true', required=True)
