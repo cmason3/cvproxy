@@ -27,7 +27,7 @@ setup(
     "Programming Language :: Python :: 3"
   ],
   packages=["cvproxy"],
-  install_requires=["pyavd>=5.7.2"],
+  install_requires=["pyavd>=5.7.2", "jsonschema"],
   entry_points={
     "console_scripts": [
       "cvproxy=cvproxy:main",
