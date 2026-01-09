@@ -18,8 +18,8 @@ jobs:
         with:
           python-version: "3.x"
 
+      - run: "sed -i '/^#/,$!d' README.md"
       - run: "python3 -m pip install build --user"
-
       - run: "python3 -m build"
 
       - uses: actions/upload-artifact@v6
