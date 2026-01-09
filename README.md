@@ -43,7 +43,7 @@ It works by accepting a HTTP POST request with a `Content-Type` of `application/
   },
   "cv_server": { "type": "string", "minLength": 1 },
   "cv_token": { "type": "string", "minLength": 1 },
-  "cv_change_control_name": { "type": "string", "minLength": 1 }
+  "cv_change_control_name": { "type": "string", "minLength": 1 },
   "cv_delete_workspace": { "type": "boolean" }
 }
 ```
