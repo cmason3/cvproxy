@@ -1,3 +1,4 @@
+[![PyPI](https://img.shields.io/pypi/v/cvproxy.svg)](https://pypi.python.org/pypi/cvproxy/)
 ![Python](https://img.shields.io/badge/python-≥&nbsp;3.10-brightgreen)
 
 # Arista CloudVision Proxy
