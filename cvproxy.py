@@ -26,7 +26,7 @@ from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVCha
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '0.0.1'
+__version__ = '1.0.0'
 
 schema = {
   'unevaluatedProperties': False,
