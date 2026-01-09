@@ -1,3 +1,25 @@
+[project]
+name = "cvproxy"
+dynamic = ["version"]
+requires-python = ">= 3.10"
+dependencies = ["pyavd>=5.7.2", "jsonschema"]
+authors = [{ name = "Chris Mason", email = "chris@netnix.org" }]
+description = "CVProxy - CloudVision Proxy"
+readme = "README.md"
+license = "MIT"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3"
+]
+
+[project.urls]
+Repository = "https://github.com/cmason3/cvproxy.git"
+Issues = "https://github.com/cmason3/cvproxy/issues"
+Changelog = "https://github.com/cmason3/cvproxy/blob/main/CHANGELOG.md"
+
 [build-system]
 requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = { attr = "cvproxy.__version__" }
