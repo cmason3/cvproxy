@@ -171,7 +171,7 @@ def log(t):
   with llock:
     print(f'[{timestamp}] {t}')
   
-def main(flag=[0], n_threads=4):
+def __main__(flag=[0], n_threads=4):
   try:
     print(f'CVProxy v{__version__} - CloudVision Proxy')
     print('Copyright (c) 2026 Chris Mason <chris@netnix.org>\n')
@@ -222,4 +222,4 @@ def main(flag=[0], n_threads=4):
 
 
 if __name__ == '__main__':
-  main() 
+  __main__()
