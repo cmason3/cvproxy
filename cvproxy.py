@@ -16,13 +16,15 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import asyncio, io, os, sys, socket, signal, jsonschema, base64, threading
-import argparse, urllib3, time, tempfile, json, logging, datetime
+import argparse, urllib3, time, tempfile, json, logging, datetime, dataclasses
 from http.server import HTTPServer, BaseHTTPRequestHandler
+
+from pyavd._cv.client import CVClient
 from pyavd._cv.workflows.deploy_to_cv import deploy_to_cv
 from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVChangeControl
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-logging.getLogger().setLevel(logging.CRITICAL)
+logging.getLogger().setLevel(logging.ERROR)
 
 __version__ = '1.0.0'
 
@@ -34,7 +36,7 @@ schema = {
       'minProperties': 1,
       'unevaluatedProperties': False,
       'patternProperties': {
-        '^[a-z][a-z0-9_-]*$': {
+        '^[a-z][a-z0-9_.-]*$': {
           'unevaluatedProperties': False,
           'required': ['configlet'],
           'properties': {
@@ -46,11 +48,21 @@ schema = {
     },
     'cv_server': { 'type': 'string', 'minLength': 1 },
     'cv_token': { 'type': 'string', 'minLength': 1 },
-    'cv_change_control_name': { 'type': 'string', 'minLength': 1 }
+    'cv_change_control_name': { 'type': 'string', 'minLength': 1 },
+    'cv_delete_workspace': { 'type': 'boolean' }
   }
 }
 
 llock = threading.RLock()
+
+async def deploy(cv, configs, change_control=False, strict_tags=False, delete_workspace=False):
+  r = await deploy_to_cv(cloudvision=cv, configs=configs, change_control=change_control, strict_tags=strict_tags)
+
+  if delete_workspace and r.workspace.id:
+    async with CVClient(servers=cv.servers, token=cv.token, username=cv.username, password=cv.password, verify_certs=cv.verify_certs) as cv_client:
+      await cv_client.delete_workspace(workspace_id=r.workspace.id)
+
+  return r
 
 class CVProxyRequest(BaseHTTPRequestHandler):
   server_version = 'CVProxy/' + __version__
@@ -58,19 +70,21 @@ class CVProxyRequest(BaseHTTPRequestHandler):
 
   def log_message(self, format, *args):
     if int(args[1]) >= 400:
-      status = f'\033[31m{args[1]}\033[0m'
-    elif int(args[1]) >= 300:
-      status = f'\033[33m{args[1]}\033[0m'
+      rcode = f'\033[31m{args[1]}\033[0m'
+    elif self.status == 'error':
+      rcode = f'\033[33m{args[1]}\033[0m'
     else:
-      status = f'\033[32m{args[1]}\033[0m'
+      rcode = f'\033[32m{args[1]}\033[0m'
 
     if self.args.xff and 'X-Forwarded-For' in self.headers:
-      log(f'[{self.headers["X-Forwarded-For"]}] [{status}] {args[0]}')
+      log(f'[{self.headers["X-Forwarded-For"]}] [{rcode}] {args[0]}')
 
     else:
-      log(f'[{self.address_string()}] [{status}] {args[0]}')
+      log(f'[{self.address_string()}] [{rcode}] {args[0]}')
 
   def do_POST(self):
+    self.status = None
+
     try:
       config_objects = []
 
@@ -100,14 +114,19 @@ class CVProxyRequest(BaseHTTPRequestHandler):
               tmp.write(base64.b64decode(data['devices'][device]['configlet'], validate=True))
               config_objects.append(CVEosConfig(file=tmp.name, device=device_object, configlet_name=f'AVD-{device}'))
 
-              if config_objects:
-                r = asyncio.run(deploy_to_cv(cloudvision=cloudvision, configs=config_objects, change_control=change_control, strict_tags=False))
+          r = asyncio.run(deploy(cloudvision, config_objects, change_control, delete_workspace=data.get('cv_delete_workspace')))
 
-                if r.failed:
-                  response = { 'status': 'error', 'error': str(r.errors) }
+          if r.failed:
+            self.status = 'error'
+            r.errors = [str(error) for error in r.errors]
+            response = { 'status': 'error', 'errors': dataclasses.asdict(r)['errors'] }
 
-                else:
-                  response = { 'status': 'ok' }
+          else:
+            self.status = 'ok'
+            if r.workspace.change_control_id is not None:
+              response = { 'status': 'ok', 'change_control': r.change_control.name }
+            else:
+              response = { 'status': 'ok' }
       
           r = ['text/plain', 200, json.dumps(response, indent=2)]
 
@@ -118,7 +137,7 @@ class CVProxyRequest(BaseHTTPRequestHandler):
         r = ['text/plain', 415, '415 Unsupported Media Type']
 
     except Exception as e:
-      response = { 'status': 'error', 'error': f'{type(e).__name__}: {e}' }
+      response = { 'status': 'error', 'errors': [f'{type(e).__name__}: {e.message}'] }
       r = ['text/plain', 200, json.dumps(response, indent=2)]
 
     finally:
