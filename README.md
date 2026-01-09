@@ -72,6 +72,6 @@ The `cv_delete_workspace` attribute is also optional and if set to "true" will c
 
 Successful HTTP responses will be JSON encoded and will always contain a `status` attribute, which will either be "ok" or "error".
 If it is set to "ok" then an optional `change_control` attribute will be included if a Change Control was generated.
-If it is set to "error" then an `error` attribute will also be provided with details of why it failed.
+If it is set to "error" then an `errors` attribute will also be provided with details of why it failed.
 
 The recommended deployment is to deploy HAProxy in front of CVProxy, as HAProxy is better equipped to deal with TLS termination and it also supports HTTP/2 and HTTP/3 transports.
