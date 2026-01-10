@@ -17,7 +17,7 @@
 
 import asyncio, io, os, sys, socket, signal, jsonschema, base64, threading
 import argparse, urllib3, time, tempfile, json, logging, datetime, dataclasses
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
 
 from pyavd._cv.client import CVClient
 from pyavd._cv.workflows.deploy_to_cv import deploy_to_cv
@@ -85,10 +85,13 @@ class CVProxyRequest(BaseHTTPRequestHandler):
     log(f'[{remote_addr}] [{status}] {self.command} {self.path} {self.request_version}')
 
   def send_error(self, code, message=None, explain=None):
+    body = f'{code} {code.phrase}'
     self.send_response(code)
-    self.send_header('Content-Length', 0)
+    self.send_header('Content-Type', 'text/plain')
+    self.send_header('Content-Length', len(body))
     self.send_header('Connection', 'close')
     self.end_headers()
+    self.wfile.write(body.encode('utf-8'))
 
   def do_POST(self):
     self.status = None
@@ -135,38 +138,35 @@ class CVProxyRequest(BaseHTTPRequestHandler):
             else:
               response = { 'status': 'ok' }
       
-          r = ['text/plain', 200, json.dumps(response, indent=2)]
+          r = ['application/json', 200, json.dumps(response, indent=2)]
 
         else:
-          r = ['text/plain', 415, None]
+          r = ['text/plain', 415, f'415 {HTTPStatus(415).phrase}']
 
       else:
-        r = ['text/plain', 400, None]
+        r = ['text/plain', 400, f'400 {HTTPStatus(400).phrase}']
 
     except jsonschema.ValidationError as e:
       response = { 'status': 'error', 'errors': [f'{type(e).__name__}: {e.message}'] }
-      r = ['text/plain', 200, json.dumps(response, indent=2)]
+      r = ['application/json', 200, json.dumps(response, indent=2)]
 
     except Exception as e:
       response = { 'status': 'error', 'errors': [f'{type(e).__name__}: {e}'] }
-      r = ['text/plain', 200, json.dumps(response, indent=2)]
+      r = ['application/json', 200, json.dumps(response, indent=2)]
 
     finally:
       for config_object in config_objects:
         os.remove(config_object.file)
 
-    if r[2] is not None:
+    if r[0] == 'application/json':
       self.status = response['status']
-      self.send_response(r[1])
-      self.send_header('Content-Type', r[0])
-      self.send_header('Content-Length', len(r[2]))
-      self.end_headers()
-      self.wfile.write(r[2].encode('utf-8'))
 
-    else:
-      self.send_response(r[1])
-      self.send_header('Content-Length', 0)
-      self.end_headers()
+    self.send_response(r[1])
+    self.send_header('Content-Type', r[0])
+    self.send_header('Content-Length', len(r[2]))
+    self.send_header('Connection', 'close')
+    self.end_headers()
+    self.wfile.write(r[2].encode('utf-8'))
 
 class CVProxyThread(threading.Thread):
   def __init__(self, s, args):
