@@ -69,29 +69,18 @@ class CVProxyRequest(BaseHTTPRequestHandler):
   protocol_version = 'HTTP/1.1'
 
   def log_message(self, format, *args):
-    if int(args[1]) >= 400:
-      rcode = f'\033[31m{args[1]}\033[0m'
-    elif self.status == 'error':
-      rcode = f'\033[33m{args[1]}\033[0m'
-    else:
-      rcode = f'\033[32m{args[1]}\033[0m'
+    remote_addr = self.address_string()
+    status = int(args[1])
 
     if self.args.xff and 'X-Forwarded-For' in self.headers:
-      log(f'[{self.headers["X-Forwarded-For"]}] [{rcode}] {args[0]}')
+      remote_addr = self.headers["X-Forwarded-For"]
 
-    else:
-      log(f'[{self.address_string()}] [{rcode}] {args[0]}')
+    log(f'[{remote_addr}] [{status}] {self.command} {self.path} {self.request_version}')
 
-  def __getattr__(self, attr):
-    if attr.startswith('do_') and attr != 'do_POST':
-      return self.do_405
-    else:
-      return super().__getattr__(attr) 
-
-  def do_405(self):
-    self.send_response(405)
+  def send_error(self, code, message=None, explain=None):
+    self.send_response(code)
     self.send_header('Content-Length', 0)
-    self.send_header('Allow', 'POST')
+    self.send_header('Connection', 'close')
     self.end_headers()
 
   def do_POST(self):
@@ -100,9 +89,10 @@ class CVProxyRequest(BaseHTTPRequestHandler):
     try:
       config_objects = []
 
-      if self.headers['Content-Type'] == 'application/json':
-        if 'Content-Length' in self.headers:
-          postdata = self.rfile.read(int(self.headers['Content-Length']))
+      if 'Content-Length' in self.headers:
+        postdata = self.rfile.read(int(self.headers['Content-Length']))
+
+        if self.headers['Content-Type'] == 'application/json':
           data = json.loads(postdata.decode('utf-8'))
 
           jsonschema.validate(instance=data, schema=schema)
@@ -143,10 +133,10 @@ class CVProxyRequest(BaseHTTPRequestHandler):
           r = ['text/plain', 200, json.dumps(response, indent=2)]
 
         else:
-          r = ['text/plain', 400, None]
+          r = ['text/plain', 415, None]
 
       else:
-        r = ['text/plain', 415, None]
+        r = ['text/plain', 400, None]
 
     except jsonschema.ValidationError as e:
       response = { 'status': 'error', 'errors': [f'{type(e).__name__}: {e.message}'] }
