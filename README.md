@@ -10,7 +10,8 @@ Arista are transitioning their CloudVision provisioning model to use Studios and
 ```
 python3 -m venv /opt/cvproxy
 /opt/cvproxy/bin/python3 -m pip install cvproxy
-
+```
+```
 tee /etc/systemd/system/cvproxy.service >/dev/null <<-EOF
 [Unit]
 Description=CVProxy - CloudVision Proxy
@@ -24,7 +25,8 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
-
+```
+```
 systemctl enable --now cvproxy
 ```
 
