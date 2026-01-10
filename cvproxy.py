@@ -72,6 +72,13 @@ class CVProxyRequest(BaseHTTPRequestHandler):
     remote_addr = self.address_string()
     status = int(args[1])
 
+    if status >= 400:
+      status = f'\033[31m{status}\033[0m'
+    elif self.status == 'error':
+      status = f'\033[33m{status}\033[0m'
+    else:
+      status = f'\033[32m{status}\033[0m'
+
     if self.args.xff and 'X-Forwarded-For' in self.headers:
       remote_addr = self.headers["X-Forwarded-For"]
 
@@ -119,12 +126,10 @@ class CVProxyRequest(BaseHTTPRequestHandler):
           r = asyncio.run(deploy(cloudvision, config_objects, change_control, delete_workspace=data.get('cv_delete_workspace')))
 
           if r.failed:
-            self.status = 'error'
             r.errors = [str(error) for error in r.errors]
             response = { 'status': 'error', 'errors': dataclasses.asdict(r)['errors'] }
 
           else:
-            self.status = 'ok'
             if r.workspace.change_control_id is not None:
               response = { 'status': 'ok', 'change_control': r.change_control.name }
             else:
@@ -150,18 +155,18 @@ class CVProxyRequest(BaseHTTPRequestHandler):
       for config_object in config_objects:
         os.remove(config_object.file)
 
-    self.send_response(r[1])
-
     if r[2] is not None:
+      self.status = response['status']
+      self.send_response(r[1])
       self.send_header('Content-Type', r[0])
       self.send_header('Content-Length', len(r[2]))
-    else:
-      self.send_header('Content-Length', 0)
-
-    self.end_headers()
-
-    if r[2] is not None:
+      self.end_headers()
       self.wfile.write(r[2].encode('utf-8'))
+
+    else:
+      self.send_response(r[1])
+      self.send_header('Content-Length', 0)
+      self.end_headers()
 
 class CVProxyThread(threading.Thread):
   def __init__(self, s, args):
