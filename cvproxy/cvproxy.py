@@ -233,7 +233,8 @@ def main(flag=[0], n_threads=4):
       stack.append([tb.tb_frame.f_code.co_filename, tb.tb_frame.f_code.co_name, tb.tb_lineno])
       tb = tb.tb_next
 
-    print(f'Error[{os.path.basename(stack[0][0])}:{stack[0][2]}]: {type(e).__name__}: {e}', file=sys.stderr)
+    src = os.path.basename(stack[0][0]).replace('__init__', 'cvproxy')
+    print(f'Error[{src}:{stack[0][2]}]: {type(e).__name__}: {e}', file=sys.stderr)
 
   finally:
     if flag[0] > 0:
