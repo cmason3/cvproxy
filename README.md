@@ -17,6 +17,7 @@ tee /etc/systemd/system/cvproxy.service >/dev/null <<-EOF
 Description=CVProxy
 
 [Service]
+Environment="VIRTUAL_ENV=/opt/cvproxy"
 ExecStart=/opt/cvproxy/bin/python3 -u -m cvproxy -s -l 127.0.0.1 -p 8080
 SyslogIdentifier=cvproxy
 TimeoutStartSec=60
