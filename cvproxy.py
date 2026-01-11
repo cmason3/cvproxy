@@ -84,10 +84,9 @@ class CVProxyRequest(BaseHTTPRequestHandler):
 
     log(f'[{remote_addr}] [{status}] {self.command} {self.path} {self.request_version}')
 
-  def send_error(self, code, message=None, explain=None):
-    body = f'{code} {code.phrase}'
+  def send_r(self, ctype, code, body):
     self.send_response(code)
-    self.send_header('Content-Type', 'text/plain')
+    self.send_header('Content-Type', ctype)
     self.send_header('Content-Length', len(body))
     self.send_header('Connection', 'close')
     self.end_headers()
@@ -161,12 +160,10 @@ class CVProxyRequest(BaseHTTPRequestHandler):
     if r[0] == 'application/json':
       self.status = response['status']
 
-    self.send_response(r[1])
-    self.send_header('Content-Type', r[0])
-    self.send_header('Content-Length', len(r[2]))
-    self.send_header('Connection', 'close')
-    self.end_headers()
-    self.wfile.write(r[2].encode('utf-8'))
+    self.send_r(*r)
+
+  def send_error(self, code, message=None, explain=None):
+    self.send_r('text/plain', code, f'{code} {code.phrase}')
 
 class CVProxyThread(threading.Thread):
   def __init__(self, s, args):

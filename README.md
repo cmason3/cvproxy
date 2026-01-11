@@ -14,7 +14,7 @@ python3 -m venv /opt/cvproxy
 ```
 tee /etc/systemd/system/cvproxy.service >/dev/null <<-EOF
 [Unit]
-Description=CVProxy - CloudVision Proxy
+Description=CVProxy
 
 [Service]
 ExecStart=/opt/cvproxy/bin/python3 -u -m cvproxy -s -l 127.0.0.1 -p 8080
