@@ -15,7 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import asyncio, io, os, sys, socket, signal, jsonschema, base64, threading
+import asyncio, io, os, sys, socket, signal, re, jsonschema, base64, threading
 import argparse, urllib3, time, tempfile, json, logging, datetime, dataclasses
 from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
 
@@ -26,7 +26,7 @@ from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVCha
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 schema = {
   'unevaluatedProperties': False,
