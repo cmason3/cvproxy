@@ -14,7 +14,7 @@ python3 -m venv /opt/cvproxy
 ```
 tee /etc/systemd/system/cvproxy.service >/dev/null <<-EOF
 [Unit]
-Description=CloudVision Proxy
+Description=CVProxy - CloudVision Proxy
 
 [Service]
 Environment="VIRTUAL_ENV=/opt/cvproxy"
