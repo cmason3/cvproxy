@@ -1,1 +1,1 @@
-../cvproxy.py
+cvproxy.py
