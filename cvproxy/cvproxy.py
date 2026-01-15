@@ -135,7 +135,7 @@ class CVProxyRequest(BaseHTTPRequestHandler):
               tmp.write(base64.b64decode(data['devices'][device]['configlet'], validate=True))
               config_objects.append(CVEosConfig(file=tmp.name, device=device_object, configlet_name=f'AVD-{device}'))
 
-          r = asyncio.run(deploy(cloudvision, config_objects, device_tags, change_control, delete_workspace=data.get('cv_delete_workspace')))
+          r = asyncio.run(deploy(cloudvision, config_objects, device_tags, change_control, strict_tags=data.get('cv_strict_tags'), delete_workspace=data.get('cv_delete_workspace')))
 
           if r.failed:
             r.errors = [str(error) for error in r.errors]
