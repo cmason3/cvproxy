@@ -57,7 +57,7 @@ It works by accepting a HTTP POST request with a `Content-Type` of `application/
         "required": ["configlet"],
         "properties": {
           "serial_number": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{10}$" },
-          "configlet": { "type": "string", "pattern": "^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$" }
+          "configlet": { "type": "string", "pattern": "^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$" },
           "tags": {
             "minProperties": 1,
             "additionalProperties": { "type": "string", "pattern": "\S+" }

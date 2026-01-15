@@ -36,23 +36,23 @@ schema = {
       'minProperties': 1,
       'unevaluatedProperties': False,
       'patternProperties': {
-        '^[a-z][a-z0-9_.-]*$': {
+        r'^[a-z][a-z0-9_.-]*$': {
           'unevaluatedProperties': False,
           'required': ['configlet'],
           'properties': {
-            'serial_number': { 'type': 'string', 'pattern': '^[A-Z][A-Z0-9]{10}$' },
-            'configlet': { 'type': 'string', 'pattern': '^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$' }
+            'serial_number': { 'type': 'string', 'pattern': r'^[A-Z][A-Z0-9]{10}$' },
+            'configlet': { 'type': 'string', 'pattern': r'^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$' },
             'tags': {
               'minProperties': 1,
-              'additionalProperties': { 'type': 'string', 'pattern': '\S+' }
+              'additionalProperties': { 'type': 'string', 'pattern': r'\S+' }
             }
           }
         }
       }
     },
-    'cv_server': { 'type': 'string', 'pattern': '\S+' },
-    'cv_token': { 'type': 'string', 'pattern': '\S+' },
-    'cv_change_control_name': { 'type': 'string', 'pattern': '\S+' },
+    'cv_server': { 'type': 'string', 'pattern': r'\S+' },
+    'cv_token': { 'type': 'string', 'pattern': r'\S+' },
+    'cv_change_control_name': { 'type': 'string', 'pattern': r'\S+' },
     'cv_delete_workspace': { 'type': 'boolean' },
     'cv_strict_tags': { 'type': 'boolean' }
   }
@@ -129,7 +129,7 @@ class CVProxyRequest(BaseHTTPRequestHandler):
 
             if 'tags' in data['devices'][device]:
               for tag in data['devices'][device]['tags']:
-                device_tags.append(CVDeviceTag(label=tag, value=data['devices'][device]['tags'][tag], device=device_object)
+                device_tags.append(CVDeviceTag(label=tag, value=data['devices'][device]['tags'][tag], device=device_object))
 
             with tempfile.NamedTemporaryFile(delete=False) as tmp:
               tmp.write(base64.b64decode(data['devices'][device]['configlet'], validate=True))
