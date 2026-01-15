@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### 1.0.3 - In Development
+### 1.0.3 - January 15, 2026
 - Added support for deploying device tags
 
 ### 1.0.2 - January 11, 2026
