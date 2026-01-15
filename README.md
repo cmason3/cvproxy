@@ -45,30 +45,30 @@ systemctl enable --now cvproxy
 It works by accepting a HTTP POST request with a `Content-Type` of `application/json`, which should adhere to the following schema:
 
 ```json
-"unevaluatedProperties": False,
+"unevaluatedProperties": false,
 "required": ["devices", "cv_server", "cv_token"],
 "properties": {
   "devices": {
     "minProperties": 1,
-    "unevaluatedProperties": False,
+    "unevaluatedProperties": false,
     "patternProperties": {
       "^[a-z][a-z0-9_.-]*$": {
-        "unevaluatedProperties": False,
+        "unevaluatedProperties": false,
         "required": ["configlet"],
         "properties": {
           "serial_number": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{10}$" },
           "configlet": { "type": "string", "pattern": "^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$" },
           "tags": {
             "minProperties": 1,
-            "additionalProperties": { "type": "string", "pattern": "\S+" }
+            "additionalProperties": { "type": "string", "pattern": "\\S+" }
           }
         }
       }
     }
   },
-  "cv_server": { "type": "string", "pattern": "\S+" },
-  "cv_token": { "type": "string", "pattern": "\S+" },
-  "cv_change_control_name": { "type": "string", "pattern": "\S+" },
+  "cv_server": { "type": "string", "pattern": "\\S+" },
+  "cv_token": { "type": "string", "pattern": "\\S+" },
+  "cv_change_control_name": { "type": "string", "pattern": "\\S+" },
   "cv_delete_workspace": { "type": "boolean" },
   "cv_strict_tags": { "type": "boolean" }
 }
