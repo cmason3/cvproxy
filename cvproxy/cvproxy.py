@@ -26,7 +26,7 @@ from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVDev
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 schema = {
   'unevaluatedProperties': False,
@@ -44,7 +44,7 @@ schema = {
             'configlet': { 'type': 'string', 'pattern': r'^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$' },
             'tags': {
               'minProperties': 1,
-              'additionalProperties': { 'type': 'string', 'pattern': r'\S+' }
+              'additionalProperties': { 'type': 'string' }
             }
           }
         }

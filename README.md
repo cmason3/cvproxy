@@ -60,7 +60,7 @@ It works by accepting a HTTP POST request with a `Content-Type` of `application/
           "configlet": { "type": "string", "pattern": "^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$" },
           "tags": {
             "minProperties": 1,
-            "additionalProperties": { "type": "string", "pattern": "\\S+" }
+            "additionalProperties": { "type": "string" }
           }
         }
       }

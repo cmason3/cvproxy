@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### 1.0.4 - January 15, 2026
+- Allow empty device tags
+
 ### 1.0.3 - January 15, 2026
 - Added support for deploying device tags
 
@@ -16,6 +19,7 @@
 - Initial release
 
 
+[1.0.4]: https://github.com/cmason3/cvproxy/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/cmason3/cvproxy/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/cmason3/cvproxy/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/cmason3/cvproxy/compare/1.0.0...1.0.1
