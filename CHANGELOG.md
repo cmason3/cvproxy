@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### 1.0.3 - In Development
+- Added support for deploying device tags
+
 ### 1.0.2 - January 11, 2026
 - Forgot to import Python module `re`
 
@@ -13,6 +16,7 @@
 - Initial release
 
 
+[1.0.3]: https://github.com/cmason3/cvproxy/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/cmason3/cvproxy/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/cmason3/cvproxy/compare/1.0.0...1.0.1
 

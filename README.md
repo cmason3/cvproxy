@@ -45,27 +45,32 @@ systemctl enable --now cvproxy
 It works by accepting a HTTP POST request with a `Content-Type` of `application/json`, which should adhere to the following schema:
 
 ```json
-"unevaluatedProperties": false,
+"unevaluatedProperties": False,
 "required": ["devices", "cv_server", "cv_token"],
 "properties": {
   "devices": {
     "minProperties": 1,
-    "unevaluatedProperties": false,
+    "unevaluatedProperties": False,
     "patternProperties": {
       "^[a-z][a-z0-9_.-]*$": {
-        "unevaluatedProperties": false,
+        "unevaluatedProperties": False,
         "required": ["configlet"],
         "properties": {
           "serial_number": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{10}$" },
           "configlet": { "type": "string", "pattern": "^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$" }
+          "tags": {
+            "minProperties": 1,
+            "additionalProperties": { "type": "string", "pattern": "\S+" }
+          }
         }
       }
     }
   },
-  "cv_server": { "type": "string", "minLength": 1 },
-  "cv_token": { "type": "string", "minLength": 1 },
-  "cv_change_control_name": { "type": "string", "minLength": 1 },
-  "cv_delete_workspace": { "type": "boolean" }
+  "cv_server": { "type": "string", "pattern": "\S+" },
+  "cv_token": { "type": "string", "pattern": "\S+" },
+  "cv_change_control_name": { "type": "string", "pattern": "\S+" },
+  "cv_delete_workspace": { "type": "boolean" },
+  "cv_strict_tags": { "type": "boolean" }
 }
 ```
 
@@ -77,14 +82,21 @@ Example:
 ```json
 "devices": {
   "leaf-1a": {
-    "configlet": "<base64 encoded configlet>"
+    "configlet": "<base64 encoded configlet>",
+    "tags": {
+      "type": "leaf"
+    }
   },
   "leaf-1b": {
-    "configlet": "<base64 encoded configlet>"
+    "configlet": "<base64 encoded configlet>",
+    "tags": {
+      "type": "leaf"
+    }
   }
 },
 "cv_server": "www.cv-prod-uk-1.arista.io",
-"cv_token": "<service token>"
+"cv_token": "<service token>",
+"cv_strict_tags": true
 ```
 
 If the HTTP POST request succeeds and there are any changes then a Change Control will be created in CloudVision ready for you to review and approve.

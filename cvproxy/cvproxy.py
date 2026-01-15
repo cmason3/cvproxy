@@ -21,12 +21,12 @@ from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
 
 from pyavd._cv.client import CVClient
 from pyavd._cv.workflows.deploy_to_cv import deploy_to_cv
-from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVChangeControl
+from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVDeviceTag, CVChangeControl
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 schema = {
   'unevaluatedProperties': False,
@@ -42,21 +42,26 @@ schema = {
           'properties': {
             'serial_number': { 'type': 'string', 'pattern': '^[A-Z][A-Z0-9]{10}$' },
             'configlet': { 'type': 'string', 'pattern': '^(?=(.{4})+$)[A-Za-z0-9+/-]+={0,2}$' }
+            'tags': {
+              'minProperties': 1,
+              'additionalProperties': { 'type': 'string', 'pattern': '\S+' }
+            }
           }
         }
       }
     },
-    'cv_server': { 'type': 'string', 'minLength': 1 },
-    'cv_token': { 'type': 'string', 'minLength': 1 },
-    'cv_change_control_name': { 'type': 'string', 'minLength': 1 },
-    'cv_delete_workspace': { 'type': 'boolean' }
+    'cv_server': { 'type': 'string', 'pattern': '\S+' },
+    'cv_token': { 'type': 'string', 'pattern': '\S+' },
+    'cv_change_control_name': { 'type': 'string', 'pattern': '\S+' },
+    'cv_delete_workspace': { 'type': 'boolean' },
+    'cv_strict_tags': { 'type': 'boolean' }
   }
 }
 
 llock = threading.RLock()
 
-async def deploy(cv, configs, change_control=False, strict_tags=False, delete_workspace=False):
-  r = await deploy_to_cv(cloudvision=cv, configs=configs, change_control=change_control, strict_tags=strict_tags)
+async def deploy(cv, configs, device_tags=[], change_control=False, strict_tags=False, delete_workspace=False):
+  r = await deploy_to_cv(cloudvision=cv, configs=configs, change_control=change_control, device_tags=device_tags, strict_tags=strict_tags)
 
   if delete_workspace and r.workspace.id:
     async with CVClient(servers=cv.servers, token=cv.token, username=cv.username, password=cv.password, verify_certs=cv.verify_certs) as cv_client:
@@ -120,12 +125,17 @@ class CVProxyRequest(BaseHTTPRequestHandler):
 
           for device in data['devices']:
             device_object = CVDevice(hostname=device, serial_number=data['devices'][device].get('serial_number'))
+            device_tags = []
+
+            if 'tags' in data['devices'][device]:
+              for tag in data['devices'][device]['tags']:
+                device_tags.append(CVDeviceTag(label=tag, value=data['devices'][device]['tags'][tag], device=device_object)
 
             with tempfile.NamedTemporaryFile(delete=False) as tmp:
               tmp.write(base64.b64decode(data['devices'][device]['configlet'], validate=True))
               config_objects.append(CVEosConfig(file=tmp.name, device=device_object, configlet_name=f'AVD-{device}'))
 
-          r = asyncio.run(deploy(cloudvision, config_objects, change_control, delete_workspace=data.get('cv_delete_workspace')))
+          r = asyncio.run(deploy(cloudvision, config_objects, device_tags, change_control, delete_workspace=data.get('cv_delete_workspace')))
 
           if r.failed:
             r.errors = [str(error) for error in r.errors]
