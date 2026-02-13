@@ -20,6 +20,9 @@ Changelog = "https://github.com/cmason3/cvproxy/blob/main/CHANGELOG.md"
 [project.scripts]
 cvproxy = "cvproxy:main"
 
+[tool.setuptools]
+packages = ["cvproxy"]
+
 [build-system]
 requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
