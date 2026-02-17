@@ -34,11 +34,12 @@ systemctl enable --now cvproxy
 ### Usage
 
 ```
- cvproxy -s [-l <address>] [-p <port>] [-xff]
+ cvproxy -s [-l <address>] [-p <port>] [-logfile <logfile>] [-xff]
 
    -s                         - start CVProxy
    -l <address>               - specify a listen address (default is '127.0.0.1')
    -p <port>                  - specify a listen port (default is 8080)
+   -logfile <logfile>         - write logs to a logfile
    -xff                       - use X-Forwarded-For
 ```
 
