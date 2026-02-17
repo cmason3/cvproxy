@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### 1.0.6 - February 17, 2026
+- Fixed issue with ANSI regular expression
+
 ### 1.0.5 - February 17, 2026
 - Added support for `-logfile`
 
@@ -22,9 +25,9 @@
 - Initial release
 
 
+[1.0.6]: https://github.com/cmason3/cvproxy/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/cmason3/cvproxy/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/cmason3/cvproxy/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/cmason3/cvproxy/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/cmason3/cvproxy/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/cmason3/cvproxy/compare/1.0.0...1.0.1
-

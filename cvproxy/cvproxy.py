@@ -26,7 +26,7 @@ from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVDev
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 
 schema = {
   'unevaluatedProperties': False,
@@ -195,14 +195,14 @@ def log(t, logfile):
 
   with llock:
     if os.getenv('JOURNAL_STREAM'):
-      print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t))
+      print(re.sub(r'\033\[(?:(?:[01];)?[0-9][0-9]|0)m', '', t))
     else:
       print(f'[{timestamp}] {t}')
 
     if logfile is not None:
       try:
         with open(logfile, 'at') as f:
-          f.write(f"[{timestamp}] {re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t)}\n")
+          f.write(f"[{timestamp}] {re.sub(r'\033\[(?:(?:[01];)?[0-9][0-9]|0)m', '', t)}\n")
 
       except Exception as e:
         print(f'[{timestamp}] {e}')
