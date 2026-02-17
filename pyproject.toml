@@ -2,13 +2,13 @@
 name = "cvproxy"
 dynamic = ["version"]
 requires-python = ">= 3.10"
-dependencies = ["pyavd>=5.7.2", "jsonschema"]
+dependencies = ["pyavd<6", "jsonschema"]
 authors = [{ name = "Chris Mason", email = "chris@netnix.org" }]
 description = "CVProxy - CloudVision Proxy"
 readme = "README.md"
 license = "MIT"
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python :: 3"
 ]
 

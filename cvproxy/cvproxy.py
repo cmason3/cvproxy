@@ -26,7 +26,7 @@ from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVDev
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 
 schema = {
   'unevaluatedProperties': False,
@@ -87,7 +87,7 @@ class CVProxyRequest(BaseHTTPRequestHandler):
     if self.args.xff and 'X-Forwarded-For' in self.headers:
       remote_addr = self.headers["X-Forwarded-For"]
 
-    log(f'[{remote_addr}] [{status}] {self.command} {self.path} {self.request_version}')
+    log(f'[{remote_addr}] [{status}] {self.command} {self.path} {self.request_version}', self.args.logfile)
 
   def send_r(self, ctype, code, body):
     self.send_response(code)
@@ -190,7 +190,7 @@ class CVProxyThread(threading.Thread):
     httpd.RequestHandlerClass.args = self.args
     httpd.serve_forever()
 
-def log(t):
+def log(t, logfile):
   timestamp = datetime.datetime.now().strftime('%b %d %H:%M:%S.%f')[:19]
 
   with llock:
@@ -198,7 +198,15 @@ def log(t):
       print(re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t))
     else:
       print(f'[{timestamp}] {t}')
-  
+
+    if logfile is not None:
+      try:
+        with open(logfile, 'at') as f:
+          f.write(f"[{timestamp}] {re.sub(r'\033\[(?:1;[0-9][0-9]|0)m', '', t)}\n")
+
+      except Exception as e:
+        print(f'[{timestamp}] {e}')
+
 def main(flag=[0], n_threads=4):
   try:
     if not os.getenv('JOURNAL_STREAM'):
@@ -210,6 +218,7 @@ def main(flag=[0], n_threads=4):
     parser.add_argument('-l', metavar='<address>', default='127.0.0.1', type=str)
     parser.add_argument('-p', metavar='<port>', default=8080, type=int)
     parser.add_argument('-xff', action='store_true', default=False)
+    parser.add_argument('-logfile', metavar='<logfile>', type=str, default=None)
     args = parser.parse_args()
 
     def signal_handler(*args):
@@ -218,7 +227,7 @@ def main(flag=[0], n_threads=4):
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    log(f'Starting CVProxy (PID is {os.getpid()}) on http://{args.l}:{args.p}...')
+    log(f'Starting CVProxy (PID is {os.getpid()}) on http://{args.l}:{args.p}...', args.logfile)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -233,7 +242,7 @@ def main(flag=[0], n_threads=4):
     while flag[0] < 2:
       time.sleep(0.1)
 
-    log('Terminating CVProxy...')
+    log('Terminating CVProxy...', args.logfile)
 
   except Exception as e:
     tb = e.__traceback__
