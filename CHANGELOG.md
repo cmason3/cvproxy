@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### 1.0.7 - March 14, 2026
+- Workspaces are only deleted if `cv_delete_workspace` and their state is `submitted`
+
 ### 1.0.6 - February 17, 2026
 - Fixed issue with ANSI regular expression
 
@@ -25,6 +28,7 @@
 - Initial release
 
 
+[1.0.7]: https://github.com/cmason3/cvproxy/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/cmason3/cvproxy/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/cmason3/cvproxy/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/cmason3/cvproxy/compare/1.0.3...1.0.4
