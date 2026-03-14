@@ -22,7 +22,6 @@ from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
 from pyavd._cv.client import CVClient
 from pyavd._cv.workflows.deploy_to_cv import deploy_to_cv
 from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVDeviceTag, CVChangeControl
-from pyavd._cv.client.exceptions import CVWorkspaceBuildFailed
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
@@ -64,7 +63,7 @@ llock = threading.RLock()
 async def deploy(cv, configs, device_tags=[], change_control=False, strict_tags=False, delete_workspace=False):
   r = await deploy_to_cv(cloudvision=cv, configs=configs, change_control=change_control, device_tags=device_tags, strict_tags=strict_tags)
 
-  if not any(isinstance(e, CVWorkspaceBuildFailed) for e in r.errors) and delete_workspace and r.workspace.id:
+  if delete_workspace and r.workspace.id and r.workspace.state == 'submitted':
     async with CVClient(servers=cv.servers, token=cv.token, username=cv.username, password=cv.password, verify_certs=cv.verify_certs) as cv_client:
       await cv_client.delete_workspace(workspace_id=r.workspace.id)
 
