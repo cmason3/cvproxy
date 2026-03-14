@@ -81,23 +81,25 @@ The `configlet` attribute is mandatory and is the configlet for the device, whic
 Example:
 
 ```json
-"devices": {
-  "leaf-1a": {
-    "configlet": "<base64 encoded configlet>",
-    "tags": {
-      "type": "leaf"
+{
+  "devices": {
+    "leaf-1a": {
+      "configlet": "<base64 encoded configlet>",
+      "tags": {
+        "type": "leaf"
+      }
+    },
+    "leaf-1b": {
+      "configlet": "<base64 encoded configlet>",
+      "tags": {
+        "type": "leaf"
+      }
     }
   },
-  "leaf-1b": {
-    "configlet": "<base64 encoded configlet>",
-    "tags": {
-      "type": "leaf"
-    }
-  }
-},
-"cv_server": "www.cv-prod-uk-1.arista.io",
-"cv_token": "<service token>",
-"cv_strict_tags": true
+  "cv_server": "www.cv-prod-uk-1.arista.io",
+  "cv_token": "<service token>",
+  "cv_strict_tags": true
+}
 ```
 
 If the HTTP POST request succeeds and there are any changes then a Change Control will be created in CloudVision ready for you to review and approve.
