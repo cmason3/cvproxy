@@ -61,7 +61,7 @@ schema = {
 llock = threading.RLock()
 
 async def deploy(cv, configs, device_tags=[], change_control=False, strict_tags=False, delete_workspace=False):
-  r = await deploy_to_cv(cloudvision=cv, configs=configs, change_control=change_control, device_tags=device_tags, strict_tags=strict_tags)
+  r = await deploy_to_cv(change_control=change_control, cloudvision=cv, configs=configs, device_tags=device_tags, strict_tags=strict_tags)
 
   if delete_workspace and r.workspace.id and r.workspace.state == 'submitted':
     async with CVClient(servers=cv.servers, token=cv.token, username=cv.username, password=cv.password, verify_certs=cv.verify_certs) as cv_client:
