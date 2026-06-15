@@ -116,7 +116,11 @@ class CVProxyRequest(BaseHTTPRequestHandler):
             token = data['cv_token'],
             username = None,
             password = None,
-            verify_certs = False
+            verify_certs = False,
+            proxy_host = None,
+            proxy_port = None,
+            proxy_username = None,
+            proxy_password = None
           )
 
           change_control = CVChangeControl(
