@@ -1,7 +1,7 @@
 ## CHANGELOG
 
 ### 1.0.8 - June 15, 2026
-- Updated to work with `pyavd` 6.x
+- Updated to work with `pyavd` 6.1.x
 
 ### 1.0.7 - March 14, 2026
 - Workspaces are only deleted if `cv_delete_workspace` and their state is `submitted`
