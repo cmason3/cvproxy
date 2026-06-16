@@ -21,12 +21,12 @@ from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
 
 from pyavd._cv.client import CVClient
 from pyavd._cv.workflows.deploy_to_cv import deploy_to_cv
-from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVDeviceTag, CVChangeControl
+from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVDeviceTag, CVChangeControl, CVDeviceDeployment
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '1.0.8'
+__version__ = '1.6.2'
 
 schema = {
   'unevaluatedProperties': False,
@@ -60,8 +60,8 @@ schema = {
 
 llock = threading.RLock()
 
-async def deploy(cv, configs, device_tags=[], change_control=False, strict_tags=False, delete_workspace=False):
-  r = await deploy_to_cv(change_control=change_control, cloudvision=cv, configs=configs, device_tags=device_tags, strict_tags=strict_tags)
+async def deploy(cv, device_deployments, change_control=False, strict_tags=False, delete_workspace=False):
+  r = await deploy_to_cv(change_control=change_control, cloudvision=cv, device_deployments=device_deployments, strict_tags=strict_tags)
 
   if delete_workspace and r.workspace.id and r.workspace.state == 'submitted':
     async with CVClient(servers=cv.servers, token=cv.token, username=cv.username, password=cv.password, verify_certs=cv.verify_certs) as cv_client:
@@ -101,7 +101,8 @@ class CVProxyRequest(BaseHTTPRequestHandler):
     self.status = None
 
     try:
-      config_objects = []
+      device_deployments = []
+      tmp_files = []
 
       if 'Content-Length' in self.headers:
         postdata = self.rfile.read(int(self.headers['Content-Length']))
@@ -137,9 +138,11 @@ class CVProxyRequest(BaseHTTPRequestHandler):
 
             with tempfile.NamedTemporaryFile(delete=False) as tmp:
               tmp.write(base64.b64decode(data['devices'][device]['configlet'], validate=True))
-              config_objects.append(CVEosConfig(file=tmp.name, device=device_object, configlet_name=f'AVD-{device}'))
+              eos_config = CVEosConfig(file=tmp.name, device=device_object, configlet_name=f'AVD-{device}')
+              device_deployments.append(CVDeviceDeployment(device=device_object, eos_config=eos_config, device_tags=device_tags, interface_tags=[]))
+              tmp_files.append(tmp.name)
 
-          r = asyncio.run(deploy(cloudvision, config_objects, device_tags, change_control, strict_tags=data.get('cv_strict_tags'), delete_workspace=data.get('cv_delete_workspace')))
+          r = asyncio.run(deploy(cloudvision, device_deployments, change_control, strict_tags=data.get('cv_strict_tags'), delete_workspace=data.get('cv_delete_workspace')))
 
           if r.failed:
             r.errors = [str(error) for error in r.errors]
@@ -168,8 +171,8 @@ class CVProxyRequest(BaseHTTPRequestHandler):
       r = ['application/json', 200, json.dumps(response, indent=2)]
 
     finally:
-      for config_object in config_objects:
-        os.remove(config_object.file)
+      for f in tmp_files:
+        os.remove(f)
 
     if r[0] == 'application/json':
       self.status = response['status']

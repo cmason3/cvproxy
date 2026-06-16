@@ -1,7 +1,11 @@
 ## CHANGELOG
 
+### 1.6.2 - June 16, 2026
+- Updated to work with PyAVD 6.2.x
+- Version is now aligned with PyAVD major and minor version as it needs to be tightly coupled
+
 ### 1.0.8 - June 15, 2026
-- Updated to work with `pyavd` 6.x
+- Updated to work with PyAVD 6.1.x
 
 ### 1.0.7 - March 14, 2026
 - Workspaces are only deleted if `cv_delete_workspace` and their state is `submitted`
@@ -31,6 +35,7 @@
 - Initial release
 
 
+[1.6.2]: https://github.com/cmason3/cvproxy/compare/1.0.8...1.6.2
 [1.0.8]: https://github.com/cmason3/cvproxy/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/cmason3/cvproxy/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/cmason3/cvproxy/compare/1.0.5...1.0.6
