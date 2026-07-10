@@ -21,12 +21,12 @@ from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
 
 from pyavd._cv.client import CVClient
 from pyavd._cv.workflows.deploy_to_cv import deploy_to_cv
-from pyavd._cv.workflows.models import CloudVision, CVDevice, CVEosConfig, CVDeviceTag, CVChangeControl, CVDeviceDeployment
+from pyavd._cv.workflows.models import CloudVision, CVDevice, AvdDevice, CVEosConfig, CVDeviceTag, CVChangeControl, CVDeviceDeployment
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger().setLevel(logging.ERROR)
 
-__version__ = '1.6.2'
+__version__ = '1.6.3'
 
 schema = {
   'unevaluatedProperties': False,
@@ -129,7 +129,8 @@ class CVProxyRequest(BaseHTTPRequestHandler):
           )
 
           for device in data['devices']:
-            device_object = CVDevice(hostname=device, serial_number=data['devices'][device].get('serial_number'))
+            #device_object = CVDevice(hostname=device, serial_number=data['devices'][device].get('serial_number'))
+            device_object = CVDevice(avd_device=AvdDevice(hostname=device, serial_number=data['devices'][device].get('serial_number')))
             device_tags = []
 
             if 'tags' in data['devices'][device]:
