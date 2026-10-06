@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+### 1.6.4 - October 6, 2026
+- Updated to work with PyAVD 6.4.x
+
 ### 1.6.3 - July 10, 2026
 - Updated to work with PyAVD 6.3.x
 
@@ -38,6 +41,7 @@
 - Initial release
 
 
+[1.6.4]: https://github.com/cmason3/cvproxy/compare/1.6.3...1.6.4
 [1.6.3]: https://github.com/cmason3/cvproxy/compare/1.6.2...1.6.3
 [1.6.2]: https://github.com/cmason3/cvproxy/compare/1.0.8...1.6.2
 [1.0.8]: https://github.com/cmason3/cvproxy/compare/1.0.7...1.0.8
